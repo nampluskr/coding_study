@@ -1,58 +1,73 @@
 #pragma once
 
-#include <vector>
-using namespace std;
+#define INF 0x7fffffff
 
-// Point Update -> Range Query (sum, min, max)
+inline int min(int a, int b) { return (a < b) ? a : b; }
+inline int max(int a, int b) { return (a < b) ? b : a; }
+
+template<int N>
 struct SegmentTree {
-    vector<int> tree;
-    int N;
+    int tree[N * 4];
 
-    int merge(int left, int right) { return left + right; }     // range sum
-
-    // recursive
-    int buildRecur(const int arr[], int node, int start, int end) {
-        if (start == end)
-            return tree[node] = arr[start];
-        int mid = start + (end - start) / 2;
-        int leftVal = buildRecur(arr, node * 2, start, mid);
-        int rightVal = buildRecur(arr, node * 2 + 1, mid + 1, end);
-        return tree[node] = merge(leftVal, rightVal);
-    }
-    int queryRecur(int left, int right, int node, int start, int end) {
-        if (right < start || end < left)
-            return 0;   // default value
-        if (left <= start && end <= right)
-            return tree[node];
-
-        int mid = start + (end - start) / 2;
-        int leftVal = queryRecur(left, right, node * 2, start, mid);
-        int rightVal = queryRecur(left, right, node * 2 + 1, mid + 1, end);
-        return merge(leftVal, rightVal);
-    }
-    int updateRecur(int idx, int new_value, int node, int start, int end) {
-        if (idx < start || end < idx)
-            return tree[node];
-        if (start == end)
-            return tree[node] = new_value;
-
-        int mid = start + (end - start) / 2;
-        int leftVal = updateRecur(idx, new_value, node * 2, start, mid);
-        int rightVal = updateRecur(idx, new_value, node * 2 + 1, mid + 1, end);
-        return tree[node] = merge(leftVal, rightVal);
-    }
+    int merge(int a, int b) { return a + b; }       // range sum (default: 0)
+    //int merge(int a, int b) { return min(a, b); }   // range min (default: INF)
+    //int merge(int a, int b) { return max(a, b); }   // range max (default: -INF)
 
     // inclusive
-    void build(const int arr[], int size) {
-        N = size;
-        tree.resize(N * 4);
-        buildRecur(arr, 1, 0, N - 1);
-    }
-    int query(int left, int right) {
-        return queryRecur(left, right, 1, 0, N - 1);
-    }
-    int update(int idx, int new_value) {
-        return updateRecur(idx, new_value, 1, 0, N - 1);
+    void build(const int arr[]) { build_recur(1, 0, N - 1, arr); }
+    int query(int left, int right) { return query_recur(1, 0, N - 1, left, right); }
+    int update(int idx, int value) { return update_recur(1, 0, N - 1, idx, value); }
+    int update(int left, int right, int value) {
+        return update_recur(1, 0, N - 1, left, right, value);
     }
 
+    // recursive
+    int build_recur(int n, int s, int e, const int arr[]);
+    int query_recur(int n, int s, int e, int left, int right);
+    int update_recur(int n, int s, int e, int idx, int value);
+    int update_recur(int n, int s, int e, int left, int right, int value);
 };
+
+// recursive
+template<int N>
+int SegmentTree<N>::build_recur(int n, int s, int e, const int arr[]) {
+    if (s == e) { return tree[n] = arr[s]; }    // leaf node
+
+    int m = s + (e - s) / 2;
+    int a = build_recur(n * 2, s, m, arr);
+    int b = build_recur(n * 2 + 1, m + 1, e, arr);
+    return tree[n] = merge(a, b);
+}
+
+template<int N>
+int SegmentTree<N>::query_recur(int n, int s, int e, int left, int right) {
+    if (right < s || e < left) { return 0; }            // default value
+    if (left <= s && e <= right) { return tree[n]; }    // leaf node
+
+    int m = s + (e - s) / 2;
+    int a = query_recur(n * 2, s, m, left, right);
+    int b = query_recur(n * 2 + 1, m + 1, e, left, right);
+    return merge(a, b);
+}
+
+template<int N>
+int SegmentTree<N>::update_recur(int n, int s, int e, int idx, int value) {
+    if (idx < s || e < idx) { return tree[n]; }     // default value
+    if (s == e) { return tree[n] += value; }        // leaf node
+
+    int m = s + (e - s) / 2;
+    int a = update_recur(n * 2, s, m, idx, value);
+    int b = update_recur(n * 2 + 1, m + 1, e, idx, value);
+    return tree[n] = merge(a, b);
+}
+
+template<int N>
+int SegmentTree<N>::update_recur(int n, int s, int e, int left, int right, int value) {
+    if (right < s || e < left) { return tree[n]; }              // default value
+    if (s == e) { return tree[n] += value; }   // leaf node
+
+    int m = s + (e - s) / 2;
+    int a = update_recur(n * 2, s, m, left, right, value);
+    int b = update_recur(n * 2 + 1, m + 1, e, left, right, value);
+    return tree[n] = merge(a, b);
+}

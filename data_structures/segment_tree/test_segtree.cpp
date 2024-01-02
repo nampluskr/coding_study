@@ -1,19 +1,22 @@
 #include "segtree.h"
-#include <vector>
-using namespace std;
+#include <cstdio>
 
-SegmentTree seg;
+const int N = 5;
+int arr[N] = { 1, 2, 3, 4, 5 };
+SegmentTree<N> seg;
 
 int main()
 {
-    int arr[] = { 1, 3, 11, 6, 7, 10, 14, 9, 18, 16, 5, 4, 2, 8, 19 };
-    int size = 15;
+    seg.build(arr);
+    printf("Range Sum [0, 4] = %d\n", seg.query(0, 4));
 
-    seg.build(arr, size);
-    printf("Range Sum[5 - 8] = %d\n", seg.query(5, 8));
+    //for (int i = 0; i < N; i++) { seg.update(i, 1); }
+    seg.update(0, 4, 1);
+    printf("Range Sum [0, 4] = %d\n", seg.query(0, 4));
 
-    seg.update(5, 13);  // arr[5]: 10 -> 13
-    printf("Range Sum[5 - 8] = %d\n", seg.query(5, 8));
+    //for (int i = 0; i < N; i++) { seg.update(i, 1); }
+    seg.update(0, 5, 1);
+    printf("Range Sum [0, 4] = %d\n", seg.query(0, 4));
 
 
     return 0;
