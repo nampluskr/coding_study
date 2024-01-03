@@ -1,3 +1,5 @@
+## RangeMaxType2 와 RangeMaxType3 의 결과 상이 - 디버깅 할 것
+
 ### func.h
 
 ```cpp
