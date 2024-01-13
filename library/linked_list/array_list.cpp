@@ -1,59 +1,61 @@
-#include "list.h"
+#include "array_list.h"
 #include <cstdio>
 
-List<int> L;
-Stack<int> S;
-Queue<int> Q;
+ArrayList<int, 10> L;
+ArrayStack<int, 10> S;
+ArrayQueue<int, 10> Q;
 
 template<typename T>
-void print(const T& list) {
-    for (auto ptr = list.head; ptr; ptr = ptr->next)
-        printf("[%d]->", ptr->data);
+void printArray(const T& list) {
+    if (list.cnt > 0) {
+        for (int i = list.head; i <= list.tail; i++)
+            printf("[%d]->", list.arr[i]);
+    }
     printf("null\n");
 }
 
-void test_list() {
+void test_arrayList() {
     L.clear();
     L.push_front(1);
     L.push_front(2);
     L.push_front(3);
     L.push_front(4);
-    print(L);
+    printArray(L);
 
     L.clear();
     L.push_back(1);
     L.push_back(2);
     L.push_back(3);
     L.push_back(4);
-    print(L);
+    printArray(L);
 }
 
-void test_stack() {
+void test_arrayStack() {
     S.clear();
     S.push(1);
     S.push(2);
     S.push(3);
     S.push(4);
-    print(S);
+    printArray(S);
 
     while (!S.empty()) {
         int data = S.top(); S.pop();
         printf(">> popped: %d\n", data);
     }
-    print(S);
+    printArray(S);
 }
 
-void test_queue() {
+void test_arrayQueue() {
     Q.clear();
     Q.push(1);
     Q.push(2);
     Q.push(3);
     Q.push(4);
-    print(Q);
+    printArray(Q);
 
     while (!Q.empty()) {
         int data = Q.front(); Q.pop();
         printf(">> popped: %d\n", data);
     }
-    print(Q);
+    printArray(Q);
 }

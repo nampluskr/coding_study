@@ -3,7 +3,7 @@
 #include "node.h"
 
 template<typename T>
-struct LinkedListIterative{
+struct OrderedLinkedListIterative {
     Node<T>* head = nullptr;
 
     void clear() {
@@ -19,7 +19,8 @@ struct LinkedListIterative{
         Node<T>* ptr = head;
         while (ptr != nullptr) {
             if (ptr->data == data) { return ptr; }
-            ptr = ptr->next;
+            if (data < ptr->data) { ptr = ptr->next; }
+            else { break; }
         }
         return nullptr;
     }
@@ -28,22 +29,23 @@ struct LinkedListIterative{
         Node<T>* ptr = head;
         while (ptr != nullptr) {
             if (ptr->data == data) { return; }
-            prev = ptr;
-            ptr = ptr->next;
+            if (data < ptr->data) { prev = ptr; ptr = ptr->next; }
+            else { break; }
         }
         Node<T>* node = new Node<T>{ data, nullptr };
-        if (prev != nullptr) { prev->next = node; }
-        else { head = node; }
+        if (prev != nullptr) { prev->next = node; node->next = ptr; }
+        else { node->next = head; head = node; }
     }
     void remove(const T& data) {
         Node<T>* prev = nullptr;
         Node<T>* ptr = head;
         while (ptr != nullptr) {
             if (ptr->data == data) { break; }
-            prev = ptr;
-            ptr = ptr->next;
+            if (data < ptr->data) { prev = ptr; ptr = ptr->next; }
+            else { break; }
         }
         if (ptr == nullptr) { return; }
+        if (ptr->data != data) { return; }
 
         if (ptr->next == nullptr) {
             if (prev == nullptr) { head = nullptr; }
@@ -55,13 +57,10 @@ struct LinkedListIterative{
         }
         delete ptr;
     }
-
-    Iterator<T> begin() { return Iterator<T>(head); }
-    Iterator<T> end() { return Iterator<T>(nullptr); }
 };
 
 template<typename T>
-struct LinkedListRecursive {
+struct OrderedLinkedListRecursive {
     Node<T>* head = nullptr;
 
     Node<T>* clear(Node<T>* ptr) {
@@ -73,7 +72,8 @@ struct LinkedListRecursive {
     Node<T>* find(Node<T>* ptr, const T& data) {
         if (ptr == nullptr) { return nullptr; }
         if (ptr->data == data) { return ptr; }
-        return find(ptr->next, data);
+        if (data < ptr->data) { return find(ptr->next, data); }
+        return nullptr;
     }
     Node<T>* insert(Node<T>* ptr, const T& data) {
         if (ptr == nullptr) { 
@@ -81,7 +81,12 @@ struct LinkedListRecursive {
             return node;
         }
         if (ptr->data == data) { return ptr; }
-        ptr->next = insert(ptr->next, data);
+        if (data < ptr->data) { ptr->next = insert(ptr->next, data); }
+        else if (ptr->data < data) {
+            Node<T>* node = new Node<T>{ data, nullptr };
+            node->next = ptr;
+            ptr = node;
+        }
         return ptr;
     }
     Node<T>* remove(Node<T>* ptr, const T& data) {
@@ -93,10 +98,7 @@ struct LinkedListRecursive {
             delete temp;
             return ptr;
         }
-        ptr->next = remove(ptr->next, data);
+        if (data < ptr->data) { ptr->next = remove(ptr->next, data); }
         return ptr;
     }
-
-    Iterator<T> begin() { return Iterator<T>(head); }
-    Iterator<T> end() { return Iterator<T>(nullptr); }
 };
