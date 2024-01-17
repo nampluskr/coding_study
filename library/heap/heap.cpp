@@ -2,18 +2,15 @@
 #include <cstdio>
 #include <ctime>
 
-#ifndef MAX_SIZE
 #define MAX_SIZE    1000000
-#endif
-
-#define MAX_NUM     10
+#define MAX_NUM     100000
 
 unsigned long long seed = 7;
 int arr[MAX_SIZE];
-int size = 100;
+int size = 1000000;
 
-MaxHeap<int> pq;
-const int K = 10;
+MaxHeap<int, MAX_SIZE> pq;
+const int K = 100;
 
 int rand(unsigned long long seed) {
     seed = seed * 25214903917ULL + 11ULL;
@@ -44,7 +41,7 @@ void test_heapSort() {
     while (!pq.empty() && cnt < K) {
         int data = pq.top(); pq.pop();
         cnt++;
-        printf(">> popped [%2d]: %d\n", cnt, data);
+        //printf(">> popped [%2d]: %d\n", cnt, data);
     }
     printf(">> Time = %d ms\n", (clock() - start) / (CLOCKS_PER_SEC / 1000));
 }
@@ -62,7 +59,7 @@ void test_heapify() {
     while (!pq.empty() && cnt < K) {
         int data = pq.top(); pq.pop();
         cnt++;
-        printf(">> popped [%2d]: %d\n", cnt, data);
+        //printf(">> popped [%2d]: %d\n", cnt, data);
     }
     printf(">> Time = %d ms\n", (clock() - start) / (CLOCKS_PER_SEC / 1000));
 }
@@ -83,7 +80,7 @@ void test_topK1() {
     while (!pq.empty() && cnt < K) {
         int data = -pq.top(); pq.pop();
         cnt++;
-        printf(">> popped [%2d]: %d\n", cnt, data);
+        //printf(">> popped [%2d]: %d\n", cnt, data);
     }
     printf(">> Time = %d ms\n", (clock() - start) / (CLOCKS_PER_SEC / 1000));
 }
@@ -107,7 +104,7 @@ void test_topK2() {
     while (!pq.empty() && cnt < K) {
         int data = -pq.top(); pq.pop();
         cnt++;
-        printf(">> popped [%2d]: %d\n", cnt, data);
+        //printf(">> popped [%2d]: %d\n", cnt, data);
     }
     printf(">> Time = %d ms\n", (clock() - start) / (CLOCKS_PER_SEC / 1000));
 }

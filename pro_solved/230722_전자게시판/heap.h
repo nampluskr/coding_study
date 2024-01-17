@@ -13,7 +13,6 @@ struct MaxHeap {
     void pop() { swap(heap[1], heap[cnt--]); siftDown(1); }
     bool empty() { return cnt == 0; }
     T top() { return heap[1]; }
-    int size() { return cnt; }
 
     void siftUp(int cur) {
         int parent = cur / 2;
@@ -32,9 +31,7 @@ struct MaxHeap {
             cur = child; child = cur * 2;
         }
     }
-    void heapify(const T arr[], int size) {
-        clear();
-        for (int i = 0; i < size; i++) { heap[++cnt] = arr[i]; }
+    void heapify() {
         for (int i = cnt / 2; i >= 1; i--) { siftDown(i); }
     }
 };

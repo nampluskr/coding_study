@@ -1,3 +1,4 @@
+// Heap push: O(NlogN), Heap pop: O(KlogN)
 #if 0
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
@@ -11,19 +12,17 @@
 using namespace std;
 
 #define MAXL            (10)
-#define MAX_USERS       10000   // 사용자의 수는 10,000 이하이다.
-#define MAX_MESSAGES    50000   // 모든 함수의 호출 횟수는 50,000 이하이다.
-
-#define ADDED   0
-#define REMOVED 1
+#define MAX_USERS       10000
+#define MAX_MESSAGES    50000
+#define ERASED 1
 
 struct User {
-    char mUser[MAXL];
-    int totalPoint;
+    char mUser[MAXL + 1];
+    int totPoint;
 
     bool operator<(const User& user) const {
-        return (totalPoint < user.totalPoint) ||
-            (totalPoint == user.totalPoint && strcmp(mUser, user.mUser) > 0);
+        return (totPoint < user.totPoint) ||
+            (totPoint == user.totPoint && strcmp(mUser, user.mUser) > 0);
     }
 };
 User users[MAX_USERS];
@@ -32,25 +31,29 @@ unordered_map<string, int> userMap;
 
 struct Message {
     int mID;
-    int totalPoint;
-
-    int uIdx;
+    int totPoint;
     int mPoint;
-    int parent;
-    vector<int> childList;
-    int depth;
-    int state;
 
-    bool operator <(const Message& msg) const {
-        return (totalPoint < msg.totalPoint) ||
-            (totalPoint == msg.totalPoint && mID > msg.mID);
-    }
+    int user;
+    int root;
+    vector<int> childList;
+    int state;
 };
 Message msg[MAX_MESSAGES];
 int msgCnt;
 unordered_map<int, int> msgMap;
 bool visited[MAX_MESSAGES];
 
+struct MessageData {
+    int mID, totPoint;
+
+    bool operator <(const MessageData& msg) const {
+        return (totPoint < msg.totPoint) ||
+               (totPoint == msg.totPoint && mID > msg.mID);
+    }
+};
+
+/////////////////////////////////////////////////////////////////////
 int get_userIndex(string mUser) {
     int uIdx;
     auto iter = userMap.find(mUser);
@@ -92,18 +95,16 @@ int writeMessage(char mUser[], int mID, int mPoint)
 
     // user
     strcpy(users[uIdx].mUser, mUser);
-    users[uIdx].totalPoint += mPoint;
+    users[uIdx].totPoint += mPoint;
 
     // message
     msg[mIdx].mID = mID;
-    msg[mIdx].totalPoint += mPoint;
-    msg[mIdx].uIdx = uIdx;
+    msg[mIdx].totPoint += mPoint;
     msg[mIdx].mPoint = mPoint;
-    msg[mIdx].parent = -1;
-    msg[mIdx].depth = 0;
+    msg[mIdx].user = uIdx;
+    msg[mIdx].root = mIdx;
 
-    int res = users[uIdx].totalPoint;
-    return res;
+    return users[uIdx].totPoint;
 }
 
 int commentTo(char mUser[], int mID, int mTargetID, int mPoint)
@@ -114,77 +115,71 @@ int commentTo(char mUser[], int mID, int mTargetID, int mPoint)
 
     // user
     strcpy(users[uIdx].mUser, mUser);
-    users[uIdx].totalPoint += mPoint;
+    users[uIdx].totPoint += mPoint;
 
-    // target = message or comment
+    // comment or reply
     msg[mIdx].mID = mID;
-    msg[mIdx].totalPoint += mPoint;
-    msg[mIdx].uIdx = uIdx;
+    msg[mIdx].totPoint += mPoint;
     msg[mIdx].mPoint = mPoint;
-    msg[mIdx].parent = tIdx;
-    msg[mIdx].depth = msg[tIdx].depth + 1;
+    msg[mIdx].user = uIdx;
+    msg[mIdx].root = msg[tIdx].root;
 
-    msg[tIdx].totalPoint += mPoint;
+    // parent and root
     msg[tIdx].childList.push_back(mIdx);
+    msg[msg[mIdx].root].totPoint += mPoint;
 
-    int res;
-    if (msg[tIdx].depth == 0) {         // message <- comment
-        res = msg[tIdx].totalPoint;
-    }
-    else if (msg[tIdx].depth == 1) {    // comment <- reply
-        msg[msg[tIdx].parent].totalPoint += mPoint;
-        res = msg[msg[tIdx].parent].totalPoint;
-    }
-    return res;
+    return msg[msg[mIdx].root].totPoint;
 }
 
-void updateDown(int cur) {
-    for (int child : msg[cur].childList) {
-        if (!visited[child] && msg[child].state != REMOVED) {
-            visited[child] = true;
-            msg[child].state = REMOVED;
-            users[msg[child].uIdx].totalPoint -= msg[child].mPoint;
-            msg[cur].totalPoint -= msg[child].mPoint;
+void dfs(int cur) {
+    visited[cur] = true;
+    msg[cur].state = ERASED;
+    users[msg[cur].user].totPoint -= msg[cur].mPoint;
+    msg[msg[cur].root].totPoint -= msg[cur].mPoint;
 
-            updateDown(child);
-        }
-    }
-}
-
-void updateUP(int cur) {
-    int parent = msg[cur].parent;
-    while (parent != -1) {
-        msg[parent].totalPoint -= msg[cur].totalPoint;
-        cur = parent;
-        parent = msg[cur].parent;
-    }
+    for (int child : msg[cur].childList)
+    if (!visited[child] && msg[child].state != ERASED)
+        dfs(child);
 }
 
 int erase(int mID)
 {
-    int mIdx = get_msgIndex(mID);
     for (int i = 0; i < msgCnt; i++) { visited[i] = false; }
-    visited[mIdx] = true;
-    msg[mIdx].state = REMOVED;
-    users[msg[mIdx].uIdx].totalPoint -= msg[mIdx].mPoint;
+    int mIdx = get_msgIndex(mID);
+    dfs(mIdx);
 
-    updateUP(mIdx);
-    updateDown(mIdx);
-
-    int res;
-    if (msg[mIdx].depth == 0) { res = users[msg[mIdx].uIdx].totalPoint; }
-    else if (msg[mIdx].depth == 1) { res = msg[msg[mIdx].parent].totalPoint; }
-    else { res = msg[msg[msg[mIdx].parent].parent].totalPoint; }
-    return res;
+    if (mIdx == msg[mIdx].root)
+        return users[msg[mIdx].user].totPoint;
+    else
+        return msg[msg[mIdx].root].totPoint;
 }
 
 void getBestMessages(int mBestMessageList[])
 {
+    priority_queue<MessageData> Q;
+    for (int i = 0; i < msgCnt; i++) {
+        if (msg[i].state == ERASED) continue;
+        if (i != msg[i].root) continue;
+        Q.push({ msg[i].mID, msg[i].totPoint});
+    }
 
+    int cnt = 0;
+    while (!Q.empty() && cnt < 5) {
+        auto cur = Q.top(); Q.pop();
+        mBestMessageList[cnt++] = cur.mID;
+    }
 }
 
 void getBestUsers(char mBestUserList[][MAXL + 1])
 {
+    priority_queue<User> Q;
+    for (int i = 0; i < userCnt; i++)
+        Q.push(users[i]);
 
+    int cnt = 0;
+    while (!Q.empty() && cnt < 5) {
+        auto cur = Q.top(); Q.pop();
+        strcpy(mBestUserList[cnt++], cur.mUser);
+    }
 }
 #endif

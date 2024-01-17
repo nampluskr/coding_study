@@ -1,11 +1,12 @@
 // Heap pop: O(KlogN)
-#if 1
+#if 0
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#include "heap.h"
 #include <vector>
-#include <queue>
+//#include <queue>
 #include <unordered_map>
 #include <string>
 #include <cstring>
@@ -27,7 +28,7 @@ struct User {
     }
     bool operator<(const User& user) const {
         return (totPoint < user.totPoint) ||
-               (totPoint == user.totPoint && strcmp(mUser, user.mUser) > 0);
+            (totPoint == user.totPoint && strcmp(mUser, user.mUser) > 0);
     }
     bool operator==(const User& user) const {
         return totPoint == user.totPoint && strcmp(mUser, user.mUser) == 0;
@@ -57,15 +58,18 @@ struct MessageData {
 
     bool operator<(const MessageData& msg) const {
         return (totPoint < msg.totPoint) ||
-               (totPoint == msg.totPoint && mID > msg.mID);
+            (totPoint == msg.totPoint && mID > msg.mID);
     }
     bool operator==(const MessageData& msg) const {
         return totPoint == msg.totPoint && mID == msg.mID;
     }
 };
 
-priority_queue<MessageData> msgPQ;
-priority_queue<User> userPQ;
+//priority_queue<MessageData> msgPQ;
+//priority_queue<User> userPQ;
+
+MaxHeap<MessageData, MAX_MESSAGES> msgPQ;
+MaxHeap<User, MAX_USERS * 5> userPQ;        // Increase heap size
 
 /////////////////////////////////////////////////////////////////////
 int get_userIndex(string mUser) {
@@ -162,8 +166,8 @@ void dfs(int cur) {
     msgPQ.push({ msg[msg[cur].root].mID, msg[msg[cur].root].totPoint });
 
     for (int child : msg[cur].childList)
-    if (!visited[child] && msg[child].state != ERASED)
-        dfs(child);
+        if (!visited[child] && msg[child].state != ERASED)
+            dfs(child);
 }
 
 int erase(int mID)
@@ -196,7 +200,7 @@ void getBestMessages(int mBestMessageList[])
         mBestMessageList[cnt++] = cur.mID;
         popped.push_back(mIdx);
     }
-    for (int mIdx : popped) { 
+    for (int mIdx : popped) {
         Q.push({ msg[mIdx].mID, msg[mIdx].totPoint });
     }
 }
