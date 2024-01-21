@@ -46,8 +46,9 @@ static bool run() {
 		case CMD_CALC:
 			scanf("%d %d %d", &sCity, &eCity, &ans);
 			ret = calculate(sCity, eCity);
-			if (ans != ret)
+			if (ans != ret) {
 				okay = false;
+			}
 			break;
 
 		default:
