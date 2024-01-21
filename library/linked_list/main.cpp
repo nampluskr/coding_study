@@ -1,6 +1,7 @@
 #include <cstdio>
 
 extern void test_traversal();
+extern void test_linkedList();
 
 extern void test_list();
 extern void test_stack();
@@ -21,6 +22,9 @@ int main()
     //printf("\n*** [Linked List Traversal]\n");
     //test_traversal();
 
+    printf("\n*** [Linked List]\n");
+    test_linkedList();
+
     //printf("\n*** [List]\n");
     //test_list();
 
@@ -30,14 +34,14 @@ int main()
     //printf("\n*** [Queue]\n");
     //test_queue();
 
-    printf("\n*** [Array List]\n");
-    test_arrayList();
+    //printf("\n*** [Array List]\n");
+    //test_arrayList();
 
-    printf("\n*** [Array Stack]\n");
-    test_arrayStack();
+    //printf("\n*** [Array Stack]\n");
+    //test_arrayStack();
 
-    printf("\n*** [Array Queue]\n");
-    test_arrayQueue();
+    //printf("\n*** [Array Queue]\n");
+    //test_arrayQueue();
 
     //printf("\n*** [Linked List (Iterative)]\n");
     //test_listIter();

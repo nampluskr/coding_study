@@ -1,21 +1,13 @@
 #pragma once
 
-#ifndef MAX_SIZE
-#define MAX_SIZE    1000000
-#endif
-
-#include "func.h"
-
-
+template<int max_size>
 struct PrefixSum {
-    int table[MAX_SIZE + 1];
+    int table[max_size + 1];
 
-    void init(int size) {
-        for (int i = 0; i < size; i++) { table[i] = 0; }
-    }
+    void clear() { for (int i = 1; i <= max_size; i++) table[i] = 0; }
     void build(const int arr[], int size) {
-        table[0] = 0;
-        for (int i = 0; i < size; i++) { table[i + 1] = table[i] + arr[i]; }
+        for (int i = 0; i < size; i++)
+            table[i + 1] = table[i] + arr[i];
     }
     int queryRange(int left, int right) {
         return table[right + 1] - table[left];

@@ -32,6 +32,8 @@ Node<int>* new_node(int data, Node<int>* next = nullptr) {
 Iterator<int> begin() { return Iterator<int>(head); }
 Iterator<int> end() { return Iterator<int>(nullptr); }
 
+LinkedList<int> L;
+
 void test_traversal() {
     auto n5 = new_node(5, nullptr);
     auto n4 = new_node(4, n5);
@@ -68,5 +70,25 @@ void test_traversal() {
 
     printf(">> postorder (recursive):\n");
     postorder(head);    printf("null\n");
+}
 
+void test_linkedList() {
+    L.clear();
+    L.push_back(1);
+    L.push_back(2);
+    L.push_back(3);
+    L.push_back(4);
+    L.push_back(5);
+
+    printf(">> Using Pointer:\n");
+    for (auto ptr = L.head; ptr; ptr = ptr->next) {
+        printf("[%d]->", ptr->data);
+    }
+    printf("null\n");
+
+    printf(">> Using Iterator:\n");
+    for (auto x: L) {
+        printf("[%d]->", x);
+    }
+    printf("null\n");
 }

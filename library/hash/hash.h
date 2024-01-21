@@ -1,48 +1,38 @@
 #pragma once
 
-#define MAX_TABLE   10
-
-template<typename T>
-struct Node {
-    T data = {};
-    Node* next = nullptr;
-};
+#define MAX_TABLE   11      // use prime number
 
 template<typename T>
 struct LinkedList {
-    Node<T>* head = nullptr;
-    Node<T>* tail = nullptr;
-    int listSize = 0;
+    struct Node {
+        T data = {};
+        Node* next = nullptr;
+    };
+    Node* head = nullptr;
+    Node* tail = nullptr;
 
     void clear() { while (head != nullptr) pop_front(); }
     void push_back(const T& data) {
-        Node<T>* node = new Node<T>{ data, nullptr };
+        Node* node = new Node{ data, nullptr };
         if (head == nullptr) { head = tail = node; }
         else { tail->next = node; tail = node; }
-        listSize++;
     }
     void pop_front() {
-        Node<T>* temp = head;
+        Node* temp = head;
         head = head->next;
         delete temp;
         if (head == nullptr) { tail = nullptr; }
-        listSize--;
     }
 };
 
 template<typename T>
-int hashfunc(T key) { return 0; }
+int hashfunc(T key) { return key % MAX_TABLE; }
 
-template<>
-int hashfunc(int key) { return key % MAX_TABLE; }
-
-template<>
-int hashfunc(const char* key) {
+// Explicit template specialization for hashfunc()
+template<> int hashfunc(const char* key) {
     unsigned long long hash = 5381;
     int c;
-    while (c = *key++) {
-        hash = (((hash << 5) + hash) + c) % MAX_TABLE;
-    }
+    while (c = *key++) { hash = (((hash << 5) + hash) + c) % MAX_TABLE; }
     return hash % MAX_TABLE;
 }
 
@@ -61,17 +51,17 @@ struct HashMap {
     }
     Pair* find(const Key& key) {
         int hash = hashfunc(key);
-        for (auto ptr = table[hash].head; ptr; ptr = ptr->next) {
+        for (auto ptr = table[hash].head; ptr; ptr = ptr->next)
             if (ptr->data.key == key)
                 return &ptr->data;  // { key, data }
-        }
         return nullptr;
     }
     Data& operator[](const Key& key) {
         auto ptr = find(key);
         if (ptr == nullptr) {
-            emplace(key, {});
-            return find(key)->data;
+            int hash = hashfunc(key);
+            table[hash].push_back({ key, {} });
+            return table[hash].tail->data.data;
         }
         else { return ptr->data; }
     }

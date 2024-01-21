@@ -1,18 +1,28 @@
-﻿#pragma once
+#pragma once
+
+#include "func.h"
+
+#ifndef MAX_SIZE
+#define MAX_SIZE 1000000
+#endif
+
+#ifndef INF
+#define INF 0x7ffffff
+#endif
 
 template<int max_size>
-struct SegmentTree {
+struct SegmentTreeMin {
     int tree[max_size * 4];
     int N;                          // tree size
-    const int DEFAULT_VALUE = 0;    // for range sum
+    const int DEFAULT_VALUE = INF;  // for range min
 
-    int merge(int a, int b) { return a + b; }
+    int merge(int a, int b) { return min(a, b); }
     void init(int size) { N = size * 4; clear(); }
     void clear() { for (int i = 0; i < N; i++) tree[i] = DEFAULT_VALUE; }
 
     // inclusive
     void build(const int arr[]) { build(1, 0, N - 1, arr); }
-    void updatePoint(int idx, int diff) { updatePoint(1, 0, N - 1, idx, diff); }
+    void updatePoint(int idx, int delta) { updatePoint(1, 0, N - 1, idx, delta); }
     int queryRange(int left, int right) { return queryRange(1, 0, N - 1, left, right); }
 
     // recursive
@@ -24,13 +34,13 @@ struct SegmentTree {
         int b = build(n * 2 + 1, m + 1, e, arr);
         return tree[n] = merge(a, b);
     }
-    int updatePoint(int n, int s, int e, int idx, int diff) {
+    int updatePoint(int n, int s, int e, int idx, int delta) {
         if (idx < s || e < idx) { return tree[n]; }
-        if (s == e) { return tree[n] += diff; }
+        if (s == e) { return tree[n] += delta; }
 
         int m = s + (e - s) / 2;
-        int a = updatePoint(n * 2, s, m, idx, diff);
-        int b = updatePoint(n * 2 + 1, m + 1, e, idx, diff);
+        int a = updatePoint(n * 2, s, m, idx, delta);
+        int b = updatePoint(n * 2 + 1, m + 1, e, idx, delta);
         return tree[n] = merge(a, b);
     }
     int queryRange(int n, int s, int e, int left, int right) {
@@ -46,15 +56,15 @@ struct SegmentTree {
 
 // Lazy Propagation
 template<int max_size>
-struct SegmentTreeRange{
+struct SegmentTreeMinRange {
     int tree[max_size * 4];
     int lazyValues[max_size * 4];
     bool lazyExist[max_size * 4];
     int N;                          // tree size
-    const int DEFAULT_VALUE = 0;    // for range sum
+    const int DEFAULT_VALUE = INF;  // for range sum
 
-    int merge(int a, int b) { return a + b; }
-    int mergeBlock(int diff, int size) { return diff * size; }
+    int merge(int a, int b) { return min(a, b); }
+    int mergeBlock(int diff, int size) { return diff; }
     int pushDown(int n, int s, int e, int diff) {
         if (s == e) { return tree[n] += diff; }
         lazyExist[n] = true;
@@ -85,7 +95,7 @@ struct SegmentTreeRange{
 };
 
 template<int max_size>
-int SegmentTreeRange<max_size>::build(int n, int s, int e, const int arr[]) {
+int SegmentTreeMinRange<max_size>::build(int n, int s, int e, const int arr[]) {
     if (s == e) { return tree[n] = arr[s]; }
 
     int m = s + (e - s) / 2;
@@ -95,7 +105,7 @@ int SegmentTreeRange<max_size>::build(int n, int s, int e, const int arr[]) {
 }
 
 template<int max_size>
-int SegmentTreeRange<max_size>::updatePoint(int n, int s, int e, int idx, int diff) {
+int SegmentTreeMinRange<max_size>::updatePoint(int n, int s, int e, int idx, int diff) {
     if (idx < s || e < idx) { return tree[n]; }
     if (s == e) { return tree[n] += diff; }
 
@@ -106,7 +116,7 @@ int SegmentTreeRange<max_size>::updatePoint(int n, int s, int e, int idx, int di
 }
 
 template<int max_size>
-int SegmentTreeRange<max_size>::updateRange(int n, int s, int e, int left, int right, int diff) {
+int SegmentTreeMinRange<max_size>::updateRange(int n, int s, int e, int left, int right, int diff) {
     if (right < s || e < left) { return tree[n]; }
     if (s == e) { return tree[n] += diff; }
 
@@ -128,7 +138,7 @@ int SegmentTreeRange<max_size>::updateRange(int n, int s, int e, int left, int r
 }
 
 template<int max_size>
-int SegmentTreeRange<max_size>::queryRange(int n, int s, int e, int left, int right) {
+int SegmentTreeMinRange<max_size>::queryRange(int n, int s, int e, int left, int right) {
     if (right < s || e < left) { return DEFAULT_VALUE; }
     if (left <= s && e <= right) { return tree[n]; }
 
