@@ -1,3 +1,5 @@
+#include <cstdio>
+
 extern void test_bubbleSort(int);
 extern void test_selectionSort(int);
 extern void test_insertionSort(int);
@@ -14,16 +16,19 @@ int main()
 {
     int opt;
 
+    printf("\n*** Basic Sorting Methods\n");
     opt = 0;
     test_bubbleSort(opt);
     test_selectionSort(opt);
     test_insertionSort(opt);
 
+    printf("\n*** Fast Sorting Methods\n");
     opt = 1;
     test_shellSort(opt);
     test_mergeSort(opt);
     test_quickSort(opt);
 
+    printf("\n*** Advanced Sorting Methods\n");
     opt = 1;
     test_countingSort(opt);
     test_radixSort10(opt);
