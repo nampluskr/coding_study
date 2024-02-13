@@ -9,7 +9,7 @@ unsigned long long seed = 7;
 int arr[MAX_SIZE];
 int size = 1000000;
 
-MaxHeap<int, MAX_SIZE> pq;
+PriorityQueue<int, MAX_SIZE> pq;
 const int K = 100;
 
 int rand(unsigned long long seed) {

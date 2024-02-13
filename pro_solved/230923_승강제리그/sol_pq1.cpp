@@ -1,26 +1,25 @@
-#if 1
-// Home PC set: 1814 ms, priority_queue: 1481 ms
+#if 0
+// set 1826 ms / pq-1: 1101 ms / pq-2: 713 ms
 #include <vector>
 #include <queue>
 using namespace std;
 
-#define MAX_PLAYERS 39'990  // N: 선수들의 수(9 ≤ N ≤ 39,990)
-#define MAX_LEAGUES 3'999   // L: 리그의 개수(3 ≤ L ≤ 10, 3 ≤ N / L ≤ 3,999)
+#define MAX_PLAYERS 39'990
+#define MAX_LEAGUES 3'999
 
 struct Player {
     int ID, ability;
+
     bool operator<(const Player& player) const {
-        return (ability < player.ability) ||
-               (ability == player.ability && ID > player.ID);
+        return (ability < player.ability) || (ability == player.ability && ID > player.ID);
     }
     bool operator>(const Player& player) const {
-        return (ability > player.ability) ||
-               (ability == player.ability && ID < player.ID);
+        return (ability > player.ability) || (ability == player.ability && ID < player.ID);
     }
 };
-Player players[MAX_PLAYERS];
-int N;  // 선수들의 수
-int L;  // 리그의 개수
+//Player players[MAX_PLAYERS];
+int N;      // # of players
+int L;      // # of leagues
 
 struct League {
     struct MaxPlayer {
@@ -72,7 +71,7 @@ struct League {
             leftHeap.push({ top.player, top.idx });
             leftSize++;
         }
-        else {  // leftSize > rightSize
+        else if (leftSize > rightSize) {
             leftHeap.push({ player, idx });
             refresh(leftHeap);
             auto top = leftHeap.top(); leftHeap.pop();
@@ -81,18 +80,18 @@ struct League {
         }
         idx++;
     }
-    Player getMax() {
-        refresh(maxHeap);
-        auto top = maxHeap.top(); maxHeap.pop();
-        popped[top.idx] = true;
-        rightSize--;
-        return top.player;
-    }
     Player getMin() {
         refresh(minHeap);
         auto top = minHeap.top(); minHeap.pop();
         popped[top.idx] = true;
         leftSize--;
+        return top.player;
+    }
+    Player getMax() {
+        refresh(maxHeap);
+        auto top = maxHeap.top(); maxHeap.pop();
+        popped[top.idx] = true;
+        rightSize--;
         return top.player;
     }
     Player getMedian() {
@@ -104,7 +103,7 @@ struct League {
             popped[top.idx] = true;
             rightSize--;
         }
-        else {  // leftSize > rightSize
+        else if (leftSize > rightSize) {
             refresh(leftHeap);
             auto top = leftHeap.top(); leftHeap.pop();
             player = top.player;
@@ -125,21 +124,19 @@ void init(int _N, int _L, int mAbility[])
 {
     N = _N;
     L = _L;
-
-    //for (int i = 0; i < N; i++) { players[i] = {}; }
-    for (int i = 0; i < L; i++) { leagues[i].clear(); }
-
+    for (int i = 0; i < L; i++) {
+        leagues[i] = {};      // 600 ms
+        //leagues[i].clear();     // 783 ms
+    }
     for (int i = 0; i < N; i++) {
-        players[i] = { i, mAbility[i] };
-        leagues[i / (N/L)].push({i, mAbility[i]});
+        //players[i] = { i, mAbility[i] };
+        leagues[i / (N / L)].push({ i, mAbility[i] });
     }
 }
 
-// 500
 int move()
 {
     int res = 0;
-
     for (int i = 0; i < L - 1; i++) {
         auto minPlayer = leagues[i].getMin();
         auto maxPlayer = leagues[i + 1].getMax();
@@ -156,7 +153,6 @@ int move()
     return res;
 }
 
-// 1,000
 int trade()
 {
     int res = 0;
