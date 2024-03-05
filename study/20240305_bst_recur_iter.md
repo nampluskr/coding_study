@@ -38,6 +38,18 @@ struct BinarySearchTree_recur {
         if (ptr->right == nullptr) return ptr;
         return find_max(ptr->right);
     }
+
+    T successor(Node<T>* ptr) {
+        ptr = ptr->right;
+        while (ptr->left != nullptr) ptr = ptr->left;
+        return ptr->data;
+    }
+    T predecessor(Node<T>* ptr) {
+        ptr = ptr->left;
+        while (ptr->right != nullptr) ptr = ptr->right;
+        return ptr->data;
+    }
+
     Node<T>* remove(Node<T>* ptr, const T& data) {
         if (ptr == nullptr) return nullptr;
 
@@ -72,25 +84,25 @@ struct BinarySearchTree_recur {
         //}
 
         // [type-2]
-        if (data == ptr->data) {
-            //if (ptr->left == nullptr && ptr->right == nullptr) {
-            //    delete ptr;
-            //    return nullptr;
-            //}
-            if (ptr->left == nullptr) {
-                Node<T>* temp = ptr->right; delete ptr;
-                return temp;
-            }
-            else if (ptr->right == nullptr) {
-                Node<T>* temp = ptr->left; delete ptr;
-                return temp;
-            }
-            else { // succ => ptr and delete succ
-                Node<T>* succ = find_min(ptr->right);
-                ptr->data = succ->data;
-                ptr->right = remove(ptr->right, succ->data);
-            }
-        }
+        //if (data == ptr->data) {
+        //    //if (ptr->left == nullptr && ptr->right == nullptr) {
+        //    //    delete ptr;
+        //    //    return nullptr;
+        //    //}
+        //    if (ptr->left == nullptr) {
+        //        Node<T>* temp = ptr->right; delete ptr;
+        //        return temp;
+        //    }
+        //    else if (ptr->right == nullptr) {
+        //        Node<T>* temp = ptr->left; delete ptr;
+        //        return temp;
+        //    }
+        //    else { // succ => ptr and delete succ
+        //        Node<T>* succ = find_min(ptr->right);
+        //        ptr->data = succ->data;
+        //        ptr->right = remove(ptr->right, succ->data);
+        //    }
+        //}
 
         //// [type-3]
         //if (data == ptr->data) {
@@ -110,22 +122,21 @@ struct BinarySearchTree_recur {
         //}
 
         // [type-4] 안됨
-        //if (data == ptr->data) {
-        //    if (ptr->left == nullptr && ptr->right == nullptr) {
-        //        ptr = nullptr;
-        //    }
-        //    else if (ptr->left == nullptr) {
-        //        Node<T>* succ = find_min(ptr->right);
-        //        ptr->data = succ->data;
-        //        ptr->right = remove(ptr->right, succ->data);
-        //    }
-        //    else if (ptr->right == nullptr) {
-        //        Node<T>* pred = find_max(ptr->right);
-        //        ptr->data = pred->data;
-        //        ptr->left = remove(ptr->left, pred->data);
-        //    }
-        //    return ptr;
-        //}
+        if (data == ptr->data) {
+            if (ptr->left == nullptr && ptr->right == nullptr) {
+                //ptr = nullptr;
+                delete ptr;
+                return nullptr;
+            }
+            else if (ptr->left == nullptr) {
+                ptr->data = successor(ptr);
+                ptr->right = remove(ptr->right, ptr->data);
+            }
+            else if (ptr->right == nullptr) {
+                ptr->data = predecessor(ptr);
+                ptr->left = remove(ptr->left, ptr->data);
+            }
+        }
 
         if (data < ptr->data) ptr->left = remove(ptr->left, data);
         else ptr->right = remove(ptr->right, data);
