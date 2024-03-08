@@ -1,7 +1,6 @@
 ### [Subset Sum] 1Sum / 2Sum / 3Sum Two Pointers
 
 ```cpp
-#if 1
 #include <vector>
 #include <algorithm>
 using namespace std;
@@ -70,13 +69,11 @@ int main()
 
     return 0;
 }
-#endif
 ```
 
 ### [Subset Sum] Backtracking
 
 ```cpp
-#if 0
 #include <vector>
 using namespace std;
 
@@ -152,7 +149,6 @@ int main()
 
     return 0;
 }
-#endif
 ```
 
 ### [subset sum] disjoint merge
@@ -253,7 +249,6 @@ int main()
 ### [감시탑] 상품권 배분
 
 ```cppp
-#if 1
 #include <vector>
 #include <unordered_map>
 using namespace std;
@@ -387,5 +382,4 @@ int distribute(int K)
     }
     return res;
 }
-#endif
 ```
