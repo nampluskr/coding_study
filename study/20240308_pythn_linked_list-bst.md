@@ -1,6 +1,6 @@
 ### [bst] recursive
 
-```cpp
+```python
 class Node:
     def __init__(self, data):
         self.data = data
@@ -112,7 +112,7 @@ if __name__ == '__main__':
 
 ### [bst] iterative
 
-```cpp
+```python
 class Node:
     def __init__(self, data):
         self.data = data
@@ -239,7 +239,7 @@ if __name__ == "__main__":
 
 ### [ordered linked lit] recursive
 
-```cpp
+```python
 class Node:
     def __init__(self, data, next=None):
         self.data = data
@@ -329,7 +329,7 @@ if __name__ == "__main__":
 
 ### [ordered linked lit] iterative
 
-```cpp
+```python
 class Node:
     def __init__(self, data, next=None):
         self.data = data
@@ -432,7 +432,7 @@ if __name__ == "__main__":
 
 ### [unordered linked lit] recursive
 
-```cpp
+```python
 class Node:
     def __init__(self, data, next=None):
         self.data = data
@@ -514,7 +514,7 @@ if __name__ == "__main__":
 
 ### [unordered linked lit] iterative
 
-```cpp
+```python
 class Node:
     def __init__(self, data, next=None):
         self.data = data
