@@ -1,7 +1,6 @@
 ### [Subset Sum] 1Sum / 2Sum / 3Sum Two Pointers
 
 ```cpp
-#if 1
 #include <vector>
 #include <algorithm>
 using namespace std;
@@ -70,13 +69,11 @@ int main()
 
     return 0;
 }
-#endif
 ```
 
 ### [Subset Sum] Backtracking
 
 ```cpp
-#if 0
 #include <vector>
 using namespace std;
 
@@ -152,13 +149,106 @@ int main()
 
     return 0;
 }
-#endif
+```
+
+### [subset sum] disjoint merge
+
+```cpp
+#include <vector>
+using namespace std;
+
+#define INF 0x7fffffff
+
+vector<int> arr = { 1, 2, 3, 4, 5, 6 };
+int n = arr.size();
+int target = 6;
+
+vector<vector<int>> sol;
+vector<int> selected;
+vector<int> bits;
+vector<int> subset;
+
+void show(const vector<int>& arr) {
+    printf("[ ");
+    for (int x : arr)
+        printf("%d, ", x);
+    printf("]\n");
+}
+
+void get_subset(int bit, int n) {
+    for (int i = 0; i < n; i++)
+        if (bit & (1 << i))
+            subset.push_back(arr[i]);
+}
+
+// arr -> bits
+void solve(int k, int sum, int bit) {
+    if (sum == target) {
+        show(selected);
+        sol.push_back(selected);
+        bits.push_back(bit);
+        return;
+    }
+    for (int i = k; i < n; i++)
+        if (sum + arr[i] <= target) {
+            selected.push_back(arr[i]);
+            solve(i + 1, sum + arr[i], bit | (1 << i));
+            selected.pop_back();
+        }
+}
+
+// bits -> disjoint
+void merge(int k, int cnt, int bit) {
+    if (k == n - 2 && cnt > 1) {
+        subset.clear();
+        for (int i = 0; i < n; i++)
+            if (bit & (1 << i))
+                subset.push_back(arr[i]);
+        show(subset);
+        return;
+    }
+    for (int i = k; i < bits.size(); i++)
+        if ((bit & bits[i]) == 0) {
+            selected.push_back(bits[i]);
+            merge(i + 1, cnt + 1, bit | bits[i]);
+            selected.pop_back();
+        }
+}
+
+
+int getMaxValue(int bit) {
+    int i;
+    bit /= 2;
+    for (i = 0; bit != 0; i++) bit /= 2;
+    return arr[i];
+}
+
+int getSol(const vector<int>& s) {
+    if (s.empty()) return -1;
+    int res = INF;
+    for (int bit : s)
+        res = min(res, getMaxValue(bit));
+    return -1;
+}
+
+
+int main()
+{
+    printf(">> Solve subset sum:\n");
+    selected.clear();
+    solve(0, 0, 0);
+
+    printf(">> Select disjoint subsets:\n");
+    selected.clear();
+    merge(0, 0, 0);
+
+    return 0;
+}
 ```
 
 ### [감시탑] 상품권 배분
 
 ```cppp
-#if 1
 #include <vector>
 #include <unordered_map>
 using namespace std;
@@ -292,5 +382,4 @@ int distribute(int K)
     }
     return res;
 }
-#endif
 ```
