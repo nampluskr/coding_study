@@ -43,6 +43,7 @@ struct BST_recur {
         else curr->right = insert(curr->right, data);
         return curr;
     }
+
     Node<T>* remove(Node<T>* curr, const T& data) {
         if (curr == nullptr) return nullptr;
         if (data == curr->data) {
@@ -71,10 +72,37 @@ struct BST_recur {
         else curr->right = remove(curr->right, data);
         return curr;
     }
+    Node<T>* remove(Node<T>* curr, const T& data) {
+        if (curr == nullptr) return nullptr;
+        if (data == curr->data) {
+            if (curr->left == nullptr && curr->right == nullptr) {
+                delete curr;
+                return nullptr;
+            }
+            else if (curr->right != nullptr) {
+                auto temp = findMinNode(curr->right);   // successor
+                curr->data = temp->data;
+                curr->right = remove(curr->right, temp->data);
+            }
+            else if (curr->left != nullptr) {
+                auto temp = findMaxNode(curr->left);    // predecessor
+                curr->data = temp->data;
+                curr->left = remove(curr->left, temp->data);
+            }
+        }
+        if (data < curr->data) curr->left = remove(curr->left, data);
+        else curr->right = remove(curr->right, data);
+        return curr;
+    }
     Node<T>* findMinNode(Node<T>* curr) {
         if (curr == nullptr) return nullptr;
         if (curr->left == nullptr) return curr;
         return findMinNode(curr->left);
+    }
+    Node<T>* findMaxNode(Node<T>* curr) {
+        if (curr == nullptr) return nullptr;
+        if (curr->right == nullptr) return curr;
+        return findMaxNode(curr->right);
     }
 };
 
@@ -246,23 +274,17 @@ void show(const T& bst) {
 template<typename T>
 void test_BST(T& bst) {
     bst.insert(5);
-    bst.insert(3);
-    bst.insert(1);
-    bst.insert(7);
-    bst.insert(10);
+    bst.insert(3); bst.insert(1); bst.insert(4);
+    bst.insert(7); bst.insert(6); bst.insert(10);
+    bst.insert(8);
     show(bst);
 
     //bst.clear();
     //show(bst);
 
-    bst.remove(1);
-    show(bst);
-
-    bst.remove(10);
-    show(bst);
-
-    bst.remove(5);
-    show(bst);
+    bst.remove(5);  show(bst);
+    bst.remove(1);  show(bst);
+    bst.remove(10); show(bst);
 }
 
 void test_BST_recur() { test_BST(bst1); }
