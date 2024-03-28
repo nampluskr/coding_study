@@ -222,3 +222,128 @@ int main()
 	return 0;
 }
 ```
+
+### Strategy  AGV System
+```cpp
+#pragma once
+
+#include <iostream>
+using namespace std;
+
+// interface
+class MoveType {
+public:
+	virtual ~MoveType() {}
+	virtual void move() = 0;
+};
+
+
+class MoveDoubleLegs : public MoveType {
+public:
+	void move() override { cout << "Move with double legs.\n"; }
+};
+
+class MoveRocket: public MoveType {
+public:
+	void move() override { cout << "Move with rocket.\n"; }
+};
+
+class MoveWings: public MoveType {
+public:
+	void move() override { cout << "Move with wings.\n"; }
+};
+
+// interface
+class LoadType {
+public:
+	virtual ~LoadType() {}
+	virtual void load() = 0;
+};
+
+class LoadRobotArm : public LoadType {
+public:
+	void load() override { cout << "Load with a robot arm\n"; }
+};
+
+class LoadDoubleHands: public LoadType {
+public:
+	void load() override { cout << "Load with double hands\n"; }
+};
+
+class LoadAbsorber: public LoadType {
+public:
+	void load() override { cout << "Load with a absorber\n"; }
+};
+
+
+// abstract
+class Company {
+protected:
+	MoveType* moveType;
+	LoadType* loadType;
+
+public:
+	virtual ~Company() {}
+	void doMove() { moveType->move(); }
+	void doLoad() { loadType->load(); }
+	virtual void display() const = 0;
+};
+
+class Gadget : public Company{
+public:
+	Gadget() {
+		moveType = new MoveDoubleLegs();
+		loadType = new LoadRobotArm();
+	}
+	void display() const override { cout << ">> Company: Gadget\n"; }
+};
+
+class TaekwonV : public Company {
+public:
+	TaekwonV() {
+		moveType = new MoveRocket();
+		loadType = new LoadDoubleHands();
+	}
+	void display() const override { cout << ">> Company: TaekwonV\n"; }
+};
+
+class Starwars : public Company {
+public:
+	Starwars() {
+		moveType = new MoveWings();
+		loadType = new LoadAbsorber();
+	}
+	void display() const override { cout << ">> Company: Starwars\n"; }
+};
+```
+
+```cpp
+#include <iostream>
+#include "system.h"
+using namespace std;
+
+int main()
+{
+	Company* company1 = new Gadget();
+	company1->display();
+	company1->doMove();
+	company1->doLoad();
+
+	cout << endl;
+	Company* company2 = new TaekwonV();
+	company2->display();
+	company2->doMove();
+	company2->doLoad();
+
+	cout << endl;
+	Company* company3 = new Starwars();
+	company3->display();
+	company3->doMove();
+	company3->doLoad();
+
+	delete company1;
+	delete company2;
+	delete company3;
+	return 0;
+}
+```
