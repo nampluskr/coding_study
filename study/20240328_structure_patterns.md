@@ -126,7 +126,7 @@ using namespace std;
 // [decorator]
 class Vegetable: public Bread {
 public:
-	//virtual string getDesc() = 0;
+	virtual string getDesc() = 0;
 };
 
 class Lettuce : public Vegetable {
