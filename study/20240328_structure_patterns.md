@@ -84,3 +84,141 @@ int main()
 }
 #endif
 ```
+
+### Decorator
+
+```cpp
+#pragma once
+#include <string>
+using namespace std;
+
+// [abstract]
+class Bread {
+protected:
+	string desc = "no title";
+public:
+	//string getDesc() { return desc; }
+	virtual string getDesc() = 0;
+	virtual int cost() = 0;
+};
+
+class Wheat : public Bread {
+public:
+	Wheat() { desc = "Wheat"; }
+	string getDesc() override { return desc; }
+	int cost() override { return 100; }
+};
+
+class White: public Bread {
+public:
+	White() { desc = "Wheat"; }
+	string getDesc() override { return desc; }
+	int cost() override { return 200; }
+};
+```
+
+```cpp
+#pragma once
+#include <string>
+#include "bread.h"
+using namespace std;
+
+// [decorator]
+class Vegetable: public Bread {
+public:
+	//virtual string getDesc() = 0;
+};
+
+class Lettuce : public Vegetable {
+private:
+	Bread* bread;
+public:
+	Lettuce(Bread* bread) { this->bread = bread; }
+	string getDesc() override {
+		return bread->getDesc() + ", Lettuce";
+	}
+	int cost() override { return bread->cost() + 300; }
+};
+
+class Tomato: public Vegetable {
+private:
+	Bread* bread;
+public:
+	Tomato(Bread* bread) { this->bread = bread; }
+	string getDesc() override {
+		return bread->getDesc() + ", Tomato";
+	}
+	int cost() override { return bread->cost() + 400; }
+};
+
+```
+
+```cpp
+#pragma once
+
+#include <string>
+#include "bread.h"
+using namespace std;
+
+// [decorator]
+class Sauce: public Bread {
+public:
+	virtual string getDesc() = 0;
+};
+
+class Ranch : public Sauce {
+private:
+	Bread* bread;
+public:
+	Ranch(Bread* bread) { this->bread = bread; }
+	string getDesc() override {
+		return bread->getDesc() + ", Ranch";
+	}
+	int cost() override { return bread->cost() + 300; }
+};
+
+class HonyMustard : public Sauce {
+private:
+	Bread* bread;
+public:
+	HonyMustard(Bread* bread) { this->bread = bread; }
+	string getDesc() override {
+		return bread->getDesc() + ", HonyMustard";
+	}
+	int cost() override { return bread->cost() + 400; }
+};
+```
+
+```cpp
+#include <iostream>
+#include "bread.h"
+#include "vegetable.h"
+#include "sauce.h"
+
+
+int main()
+{
+	Bread* bread1 = new Wheat();
+	cout << bread1->getDesc() << " + " << bread1->cost() << "\n";
+
+	cout << endl;
+	bread1 = new Lettuce(bread1);
+	bread1 = new Lettuce(bread1);
+	cout << bread1->getDesc() << " + " << bread1->cost() << "\n";
+
+	cout << endl;
+	Bread* bread2 = new White();
+	cout << bread2->getDesc() << " + " << bread2->cost() << "\n";
+
+	cout << endl;
+	bread2 = new Tomato(bread2);
+	bread2 = new Ranch(bread2);
+	bread2 = new HonyMustard(bread2);
+	cout << bread2->getDesc() << " + " << bread2->cost() << "\n";
+
+	delete bread1;
+	delete bread2;
+
+	return 0;
+}
+```
