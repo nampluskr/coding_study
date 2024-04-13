@@ -1,0 +1,36 @@
+@startuml
+
+abstract class Shape {
+    + {abstract} draw()
+}
+class Circle extends Shape {
+    + draw() override
+}
+class Square extends Shape {
+    + draw() override
+}
+
+abstract class Color {
+    + {abstract} fill()
+}
+class Red extends Color {
+    + fill() override
+}
+class Green extends Color {
+    + fill() override
+}
+
+abstract class ShapeFactory {
+    + {abstract} createShape()
+    + {abstract} createColor()
+}
+class CircleFactory extends ShapeFactory {
+    + createShape() override
+    + createColor() override
+}
+class SquareFactory extends ShapeFactory{
+    + createShape() override
+    + createColor() override
+}
+
+@enduml

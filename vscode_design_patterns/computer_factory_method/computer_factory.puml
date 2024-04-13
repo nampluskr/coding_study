@@ -1,0 +1,43 @@
+@startuml
+
+abstract class Computer {
+    - cpu
+    - ram
+    - storage
+    + operator()
+    + displaySpec()
+    + {abstract} turnOn()
+    + {abstract} turnOff()
+}
+
+note left of Computer::operator
+turnOn();
+displaySpec();
+turnOff();
+end note
+
+class DesktopComputer extends Computer {
+    + turnOn() override
+    + turnOff() override
+}
+class LaptopComputer extends Computer {
+    + turnOn() override
+    + turnOff() override
+}
+
+class ComputerFactory {
+    + createComputer(type): Computer*
+}
+
+ComputerFactory -left..> Computer
+
+note top of ComputerFactory
+    auto factory = new ComputerFactory();
+    auto desktop = factory->createComputer("desktop");
+    auto laptop = factory->createComputer("laptop");
+
+    desktop->operate();
+    laptop->operate();
+end note
+
+@enduml

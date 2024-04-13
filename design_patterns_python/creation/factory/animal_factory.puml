@@ -1,0 +1,38 @@
+@startuml
+'left to right direction
+'skinparam classAttributeIconSize 0
+
+enum AnimalType {
+    + CAT
+    + DOG
+}
+
+Abstract class Animal <<abstrac>> {
+    + {abstract} speak()
+}
+
+class Cat extends Animal {
+    + speak()
+}
+class Dog extends Animal {
+    + speak()
+}
+
+class AnimalFactory {
+    + createAnimal(type): Animal
+}
+
+AnimalType <.. AnimalFactory : <<parameter>>
+AnimalFactory ..> Cat : <<create>>
+AnimalFactory ..> Dog : <<create>>
+
+note as N1
+factory = AnimalFactory()
+cat = factory.createAnimal(AnimalType.CAT)
+cat.speak()
+dog = factory.createAnimal(AnimalType.DOG)
+dog.speak()
+end note
+
+hide empty members
+@enduml

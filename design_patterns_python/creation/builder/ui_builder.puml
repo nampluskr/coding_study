@@ -1,0 +1,32 @@
+@startuml
+
+class CatBuilder {
+    - height
+    - weight
+    - color
+    + set_height(height): CatBuilder
+    + set_weight(weight): CatBuilder
+    + set_color(color): CatBuilder
+    + build(): Cat
+}
+
+class Cat {
+    - height
+    - weight
+    - color
+    + Cat(height, weight, color)
+}
+
+CatBuilder::build -right..> Cat : <<create>>
+
+class WhiteCatBuilder extends CatBuilder {
+    - color = "white"
+}
+
+class BlackCatBuilder extends CatBuilder {
+    - color = "black"
+}
+
+
+hide empty members
+@enduml

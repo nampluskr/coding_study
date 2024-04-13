@@ -1,0 +1,75 @@
+@startuml
+'left to right direction
+'skinparam classAttributeIconSize 0
+
+
+abstract Button <<abstract>> {
+    + {abstract} click()
+}
+class DarkButton {
+    + click()
+}
+class LightButton { 
+    + click()
+}
+
+abstract CheckBox <<abstract>> {
+    + {abstract} check()
+}
+class DarkCheckBox {
+    + check()
+}
+class LightCheckBox { 
+    + check()
+}
+
+abstract ScrollBar <<abstract>> {
+    + {abstract} scroll()
+}
+class DarkScrollBar {
+    + scroll()
+}
+class LightScrollBar { 
+    + scroll()
+}
+
+interface UIFactory <<interface>> {
+    + {abstract} get_button(): Button
+    + {abstract} get_checkbox(): CheckBox
+    + {abstract} get_scrollbar(): ScrollBar
+}
+
+class DarkUIFactory {
+    + get_button(): DarkButton
+    + get_checkbox(): DarkCheckBox
+    + get_scrollbar(): DarkScrollBar
+}
+
+class LightUIFactory {
+    + get_button(): LightButton
+    + get_checkbox(): LightCheckBox
+    + get_scrollbar(): LightScrollBar
+}
+
+DarkButton --|> Button
+Button <|-- LightButton
+
+DarkCheckBox --|> CheckBox
+CheckBox <|-- LightCheckBox
+
+DarkScrollBar --|> ScrollBar
+ScrollBar <|-- LightScrollBar
+
+DarkUIFactory ..|> UIFactory
+UIFactory <|.. LightUIFactory
+
+DarkUIFactory -left..> DarkButton
+DarkUIFactory -left..> DarkCheckBox
+DarkUIFactory -left..> DarkScrollBar
+
+LightUIFactory -left..> LightButton
+LightUIFactory -left..> LightCheckBox
+LightUIFactory -left..> LightScrollBar
+
+hide empty members
+@enduml

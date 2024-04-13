@@ -1,0 +1,47 @@
+@startuml
+'left to right direction
+'skinparam classAttributeIconSize 0
+
+Abstract class Animal <<abstract>> {
+    + {abstract} speak()
+}
+
+class Cat extends Animal {
+    + speak()
+}
+class Dog extends Animal {
+    + speak()
+}
+
+interface AnimalFactory <<interfact>> {
+    + {abstract} createAnimal(): Animal
+}
+
+class CatFactory implements AnimalFactory {
+    - cat_cnt: int
+    + createAnimal(): Cat
+    + cat_count(): int
+}
+
+class DogFactory implements AnimalFactory {
+    - dog: Dog
+    + createAnimal(): Dog
+    + has_dog(): Dog
+    + add_wings(dog): Dog
+}
+
+CatFactory ..> Cat : <<create>>
+DogFactory ..> Dog : <<create>>
+
+note as N1
+cat_factory = CatFactory()
+cat1 = cat_factory.createAnimal()
+cat2 = cat_factory.createAnimal()
+
+dog_factory = DogFactory()
+dog = dog_factory.has_dog()
+dog_wings = dog_factory.add_wings(dog)
+end note
+
+hide empty members
+@enduml

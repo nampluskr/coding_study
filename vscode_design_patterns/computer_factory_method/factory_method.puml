@@ -1,0 +1,21 @@
+@startuml
+
+abstract class AbstractProduct <<abstract>> {
+    - part1 (property)
+    - part2 (property)
+    + templateMethod()
+    + {abstract} operate1()
+    + {abstract} operate2()
+}
+
+class ProductTypeA extends AbstractProduct {
+    + constructor(part1, part2)
+    + operate1() override
+    + operate2() override
+}
+class ProductTypeB extends AbstractProduct {
+    + constructor(part1, part2)
+    + operate1() override
+    + operate2() override
+}
+@enduml

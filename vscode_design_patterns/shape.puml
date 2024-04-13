@@ -1,0 +1,32 @@
+@startuml
+abstract class Shape <<abstract>> {
+  + {abstract} draw()
+}
+
+class Circle {
+  + draw()
+}
+
+class Square {
+  + draw()
+}
+
+Shape <|-- Circle
+Shape <|-- Square
+
+
+class ShapeFactory {
+  +createShape(type: string)
+}
+
+ShapeFactory -left..> Shape
+
+note right of ShapeFactory::createShape
+  Shape* circle = ShapeFactory::createShape("circle");
+  circle->draw();
+
+  Shape* square = ShapeFactory::createShape("square");
+  square->draw();
+end note
+
+@enduml
