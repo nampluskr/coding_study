@@ -76,3 +76,30 @@ class FFTShift(BaseFFT):
     def apply_fft(self):
         self.fft = fftshift2d(fft2d(self.data))
 ```
+
+```python
+class BaseFFT:
+    def __init__(self, data: ndarry):
+        self.data = data
+        self.fft = self.transform()
+        self.amp = self.amplitude()
+        self.ang = self.phase()
+
+    def transform(self):
+        pass
+
+    def amplitude(self):
+        return np.abs(self.fft)
+
+    def phase(self):
+        return np.angle(self.fft)
+
+class FFT(BaseFFT):
+    def transform(self):
+        return fft2d(self.data)
+
+class FFTShift(BaseFFT):
+    def transform(self):
+        return fftshift2d(fft2d(self.data))
+```
+
