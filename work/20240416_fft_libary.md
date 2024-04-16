@@ -1,3 +1,30 @@
+### [filter.py]
+
+```python
+import numpy as np
+from numpy import ndarray
+from scipy.ndimage import uniform_filter, gaussian_filter
+
+class Filter:
+    def __init__(self, data: ndarray):
+        self.data = data
+        self.rows = data.shape[0]
+        self.cols = data.shape[1]
+    
+    def gaussian(self, sigma=1) -> ndarray:
+        return gaussian_filter(self.data, sigma=sigma)
+    
+    def uniform(self, size=1) -> ndarray:
+        return uniform_filter(self.data, size=size, mode="nearest")
+
+    def mask(self, dr, dc, base, value) -> ndarray:
+        cr, cc = self.rows//2, self.cols//2
+        mask = np.ones_like(self.data, dtype=np.uint8)*base
+        mask[-cr-dr:cr+dr, -cc-dc:cc+dc] = value
+        return mask
+```
+
+
 ### [image.py]
 
 ```python
