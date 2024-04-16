@@ -303,3 +303,89 @@ class FFTViewer(Viewer):
         fig.tight_layout()
         plt.show()
 ```
+
+### [class diagram (plantuml)]
+
+```
+@startuml
+class ndarray
+
+class Image {
+  + data: ndarray
+  + Constructor(data)
+  + path(path): Image
+  + gray(): Image
+  + resize(width, height): Image
+  + minmax(min, max): Image
+  + info()
+}
+
+class BaseFFT {
+  + fft: ndarray
+  + amp: ndarray
+  + ang: ndarray
+  + Constructor(data)
+  + amplitude(): ndarray
+  + phase(): ndarray
+  + cmap(cm): BaseFFT 
+  + figsize(width, height): BaseFFT 
+  + axis_off(): BaseFFT
+
+  + {abstract} transform(): ndarray
+  + {abstract} show()
+}
+
+class FFT {
+  + transform(): ndarray
+  + show()
+}
+class FFTShift {
+  + transform(): ndarray
+  + show()
+}
+
+BaseFFT <|-- FFT
+BaseFFT <|-- FFTShift
+
+class BaseInvFFT {
+  + fft: ndarray
+  + ifft: ndarray
+  + Constructor(amp, ang=None)
+  + {abstract} transform(): ndarray
+}
+class InvFFT {
+  + transform(): ndarray
+}
+class InvFFTShift {
+  + transform(): ndarray
+}
+
+BaseInvFFT <|-- InvFFT
+BaseInvFFT <|-- InvFFTShift
+
+class Viewer {
+  + data: ndarray
+  + cm = "gray"
+  + Constructor(data)
+  + size = (6, 4)
+  + is_axis_off = False
+  + cmap(cm): Viewer
+  + figsize(width, height): Viewer
+  + axis_off(): Viewer
+  + show(img=None)
+}
+
+class FFTViewer extends Viewer {
+  + amp(): Viewer
+  + ang(): Viewer
+  + show(img=None)
+}
+
+ndarray <.. Image
+ndarray <.. Viewer
+ndarray <.. BaseFFT
+ndarray <.. BaseInvFFT
+
+hide empty members
+@enduml
+```
