@@ -27,6 +27,28 @@ class BlackCatBuilder extends CatBuilder {
     - color = "black"
 }
 
+class Director {
+    + set_small_cat(builder: CatBuilder)
+    + set_big_cat(builder: CatBuilder)
+}
+
+Director -down.> CatBuilder : <<paramter>>
+
+note as N1
+director = Director()
+black_cat_builder = BlackCatBuilder()
+director.set_big_cat(black_cat_builder)
+cat = black_cat_builder.build()
+end note
+
+note as N2
+cat = CatBuilder().set_height(30).set_weight(10).set_color("black").build()
+white_cat = WhiteCatBuilder().set_height(10).set_weight(10).build()
+black_cat = BlackCatBuilder().set_height(20).set_weight(20).build()
+end note
+
+Director -right.. N1
+CatBuilder .. N2
 
 hide empty members
 @enduml
