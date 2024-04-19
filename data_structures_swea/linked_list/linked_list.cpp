@@ -82,13 +82,13 @@ struct LinkedListRef {
 
     }
     void clear() {
-        while (head != NULL)
-        {
+        while (head != NULL) {
             ListNode* tmp = head;
             head = head->next;
             free(tmp);
         }
-    } // delete all nodes }
+        init();
+    }
     void print() {
         ListNode* it = head;
         printf(">> head -> ");
