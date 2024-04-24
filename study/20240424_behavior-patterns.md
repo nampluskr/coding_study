@@ -375,23 +375,74 @@ int main()
 
 #include <iostream>
 #include <string>
+#include <vector>
 using namespace std;
+
+// Memento
+class DocumentMemento {
+private:
+    string content;
+public:
+    DocumentMemento(const string& content) : content(content) {}
+    string getSavedContent() { return content; }
+};
 
 
 // Originator
-
-
-// Memento
-
+class Document {
+private:
+    string content;
+public:
+    Document(const string& content): content(content) {}
+    void write(const string& text) { content += text; }
+    string getContent() const { return content; }
+    DocumentMemento* createMemento() { return new DocumentMemento(content); }
+    void restoreFromMemento(DocumentMemento* memento) {
+        content = memento->getSavedContent();
+    }
+};
 
 // Caretaker
-
+class History {
+private:
+    vector<DocumentMemento*> mementos;
+public:
+    //History() {}
+    void addMemento(DocumentMemento* memento) { mementos.push_back(memento); }
+    DocumentMemento* getMemento(int index) { return mementos[index]; }
+};
 
 // Client
 
 
 int main()
 {
+    if (1) {
+        Document* document = new Document("Initial content\n");
+        History* history = new History();
+
+        // Write some content
+        document->write("Additional content\n");
+        history->addMemento(document->createMemento());     // index = 0
+        cout << document->getContent();
+        cout << "======================\n\n";
+
+        // Write some Content
+        document->write("More content\n");
+        history->addMemento(document->createMemento());     // index = 1
+        cout << document->getContent();
+        cout << "======================\n\n";
+
+        // Restore to previous state
+        document->restoreFromMemento(history->getMemento(0));
+        cout << document->getContent();
+
+        document->restoreFromMemento(history->getMemento(1));
+        cout << document->getContent();
+
+        delete document;
+        delete history;
+    }
     return 0;
 }
 #endif
