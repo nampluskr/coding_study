@@ -512,3 +512,101 @@ int main()
 }
 #endif
 ```
+
+### [행동_07_state]
+
+```cpp
+#if 1
+// https://www.geeksforgeeks.org/state-design-pattern/
+#include <iostream>
+#include <string>
+using namespace std;
+
+
+// State Interface
+class VendingMachineState {
+public:
+    virtual ~VendingMachineState() {}
+    virtual void handleRequest() const = 0;
+};
+
+// Context
+class VendingMachineContext {
+private:
+    VendingMachineState* state;
+public:
+    void setState(VendingMachineState* state) { this->state = state; }
+    void request() { state->handleRequest(); }
+};
+
+
+// Concrete States
+class ReadyState : public VendingMachineState {
+public:
+    void handleRequest() const override {
+        cout << "Ready state: Please select a product.\n";
+    }
+};
+
+class ProductSelectedState: public VendingMachineState {
+public:
+    void handleRequest() const override {
+        cout << "Product selected state: Processing payment.\n";
+    }
+};
+
+class PaymentPendingState: public VendingMachineState {
+public:
+    void handleRequest() const override {
+        cout << "Payment pending state: Dispensing product.\n";
+    }
+};
+
+class OutOfStockState: public VendingMachineState {
+public:
+    void handleRequest() const override {
+        cout << "Out of stock state: Product unavailable. Please select another product.\n";
+    }
+};
+
+
+
+int main()
+{
+    if (0) {
+        VendingMachineContext* machine = new VendingMachineContext();
+
+        machine->setState(new ReadyState());
+        machine->request();
+
+        machine->setState(new ProductSelectedState());
+        machine->request();
+
+        machine->setState(new PaymentPendingState());
+        machine->request();
+
+        machine->setState(new OutOfStockState());
+        machine->request();
+
+        delete machine;
+    }
+    if (1) {
+        VendingMachineContext machine;
+
+        machine.setState(new ReadyState());
+        machine.request();
+
+        machine.setState(new ProductSelectedState());
+        machine.request();
+
+        machine.setState(new PaymentPendingState());
+        machine.request();
+
+        machine.setState(new OutOfStockState());
+        machine.request();
+    }
+
+    return 0;
+}
+#endif
+```
