@@ -735,3 +735,66 @@ int main()
 }
 #endif
 ```
+
+### [구조_07_flyweight]
+
+```cpp
+// https://www.geeksforgeeks.org/flyweight-pattern-c-design-patterns/
+#include <iostream>
+#include <unordered_map>
+using namespace std;
+
+// Flyweight class
+class Character {
+private:
+	const char* intrinsicState;
+public:
+	Character(const char* intrinsicState) : intrinsicState(intrinsicState) {}
+
+	void draw(int extrinsicState) {
+		cout << "Character '" << intrinsicState << "' at position " << extrinsicState << std::endl;
+	}
+};
+
+// Flyweight factory
+class CharacterFactory {
+private:
+	unordered_map<const char*, Character*> pool;
+public:
+	Character* getCharacter(const char* key) {
+		auto iter = pool.find(key);
+		if (iter == pool.end()) {
+			auto character = new Character(key);
+			pool.emplace(key, character);
+			return character;
+		}
+		return iter->second;
+	}
+};
+
+int main()
+{
+	if (0) {
+		CharacterFactory characterFactory;
+
+		// Extrinsic state
+		int position = 0;
+
+		// Drawing characters 'A', 'B', 'C' at different positions
+		characterFactory.getCharacter("AAA")->draw(position++);
+		characterFactory.getCharacter("BBB")->draw(position++);
+		characterFactory.getCharacter("CCC")->draw(position++);
+	}
+
+	if (1) {
+		CharacterFactory factory;
+		cout << factory.getCharacter("AAA") << endl;
+		cout << factory.getCharacter("BBB") << endl;
+		cout << factory.getCharacter("CCC") << endl;
+
+		cout << factory.getCharacter("AAA") << endl;
+	}
+
+	return 0;
+}
+```
