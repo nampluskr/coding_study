@@ -610,3 +610,277 @@ int main()
 }
 #endif
 ```
+
+### [행동_08_strategy]
+
+```cpp
+#if 1
+#include <iostream>
+#include <string>
+using namespace std;
+
+// Strategy Interface
+class SortingStrategy {
+public:
+    virtual ~SortingStrategy() {};
+    virtual void sort(int arr[]) const = 0;
+};
+
+// Context
+class SortingContext {
+private:
+    SortingStrategy* sortingStrategy;
+public:
+    SortingContext(SortingStrategy* sortingStrategy) {
+        this->sortingStrategy = sortingStrategy;
+    }
+    void setSortingStrategy(SortingStrategy* sortingStrategy) {
+        this->sortingStrategy = sortingStrategy;
+    }
+    void performSort(int arr[]) {
+        sortingStrategy->sort(arr);
+    }
+};
+
+// Concrete Stretegies
+class BubbleSortStrategy : public SortingStrategy {
+public:
+    void sort(int arr[]) const override {
+        cout << "Sorting using Bubble Sort\n";
+    }
+};
+
+class MergeSortStrategy : public SortingStrategy {
+public:
+    void sort(int arr[]) const override {
+        cout << "Sorting using Merge Sort\n";
+    }
+};
+
+class QuickSortStrategy : public SortingStrategy {
+public:
+    void sort(int arr[]) const override {
+        cout << "Sorting using Quick Sort\n";
+    }
+};
+
+// Client
+
+
+int main()
+{
+    if (0) {
+        SortingContext* context = new SortingContext(new BubbleSortStrategy());
+        int arr[] = { 5, 2, 9, 1, 5 };
+        context->performSort(arr);
+
+        context->setSortingStrategy(new MergeSortStrategy());
+        context->performSort(arr);
+
+        context->setSortingStrategy(new QuickSortStrategy());
+        context->performSort(arr);
+
+        delete context;
+    }
+
+    if (1) {
+        BubbleSortStrategy bubbleSort;
+        MergeSortStrategy mergeSort;
+        QuickSortStrategy quickSort;
+
+        SortingContext context(&bubbleSort);
+        int arr[] = { 5, 2, 9, 1, 5 };
+        context.performSort(arr);
+
+        context.setSortingStrategy(&mergeSort);
+        context.performSort(arr);
+
+        context.setSortingStrategy(&quickSort);
+        context.performSort(arr);
+    }
+
+    return 0;
+}
+#endif
+```
+
+### [행동_09_template-method]
+
+```cpp
+#if 1
+#include <iostream>
+#include <string>
+using namespace std;
+
+// Abstract Class
+class BeverageMaker {
+public:
+    virtual ~BeverageMaker() {};
+
+    void makeBeverage() {
+        boilWater();
+        brew();
+        pourInCup();
+        addCondiments();
+    }
+    virtual void brew() const = 0;
+    virtual void addCondiments() const = 0;
+    void boilWater() { cout << "Boiling water\n"; }
+    void pourInCup() { cout << "Pouring into cup\n"; }
+};
+
+// Concrete Subclasses
+class TeaMaker : public BeverageMaker {
+public:
+    void brew() const override { cout << "Steeping the tea\n"; }
+    void addCondiments() const override { cout << "Adding lemon\n"; }
+};
+
+class CoffeeMaker : public BeverageMaker {
+public:
+    void brew() const override { cout << "Dripping coffee through filter\n"; }
+    void addCondiments() const override { cout << "Adding sugar and milk\n"; }
+};
+
+
+int main()
+{
+    if (0) {
+        BeverageMaker* teaMaker = new TeaMaker();
+        teaMaker->makeBeverage();
+
+        BeverageMaker* coffeeMaker = new CoffeeMaker();
+        coffeeMaker->makeBeverage();
+
+        delete teaMaker;
+        delete coffeeMaker;
+    }
+
+    if (1) {
+        TeaMaker teaMaker;
+        teaMaker.makeBeverage();
+
+        CoffeeMaker coffeeMaker;
+        coffeeMaker.makeBeverage();
+    }
+    return 0;
+}
+#endif
+```
+
+### [행동_10_visitor]
+
+```cpp
+#if 1
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+class Book;
+class Fruit;
+
+// Visitor
+class ShoppingCartVisitor {
+public:
+    virtual ~ShoppingCartVisitor() {};
+    virtual int visit(Book* book) const = 0;
+    virtual int visit(Fruit* fruit) const = 0;
+};
+
+
+// Visitable (Interface)
+class ItemElement {
+public:
+    virtual ~ItemElement() {};
+    virtual int accept(ShoppingCartVisitor* visitor) = 0;
+};
+
+// Concrete Visitalbes
+class Book : public ItemElement {
+private:
+    int price;
+    string isbnNumber;
+public:
+    Book(int price, const string& isbnNumber) {
+        this->price = price;
+        this->isbnNumber = isbnNumber;
+    }
+    int getPrice() const { return price; }
+    string getIsbnNumber() const { return isbnNumber; }
+    int accept(ShoppingCartVisitor* visitor) override { return visitor->visit(this); }
+};
+
+class Fruit : public ItemElement {
+private:
+    int price, weight;
+    string name;
+public:
+    Fruit(int price, int weight, const string& name) {
+        this->price = price;
+        this->weight = weight;
+        this->name = name;
+    }
+    int getPrice() const { return price; }
+    int getWeight() const { return weight; }
+    string getName() const { return name; }
+    int accept(ShoppingCartVisitor* visitor) override { return visitor->visit(this); }
+};
+
+// Concrete Visitors
+class ShoppingCartVisitorImpl : public ShoppingCartVisitor {
+public:
+    int visit(Book* book) const override {
+        int cost = 0;
+        if (book->getPrice() > 50)
+            cost = book->getPrice() - 5;
+        else
+            cost = book->getPrice();
+        cout << "Book ISBN: " << book->getIsbnNumber()
+            << " cost = " << book->getPrice() << endl;
+        return cost;
+    }
+    int visit(Fruit* fruit) const override {
+        int cost = fruit->getPrice() * fruit->getWeight();
+        cout << fruit->getName() << " cost = " << cost << endl;
+        return cost;
+    }
+};
+
+int calculatePrice(const vector<ItemElement*>& items) {
+    ShoppingCartVisitor* visitor = new ShoppingCartVisitorImpl();
+    int sum = 0;
+    for (auto item : items)
+        sum += item->accept(visitor);
+    return sum;
+}
+
+int main()
+{
+    if (1) {
+        vector<ItemElement*> items = { 
+            new Book(20, "1234"),
+            new Book(100, "5678"), 
+            new Fruit(10, 2, "Banana"),
+            new Fruit(5, 5, "Apple")
+        };
+        
+        int total = calculatePrice(items);
+        cout << "Total cost = " << total << endl;
+    }
+
+    //if (0) {
+    //    vector<const ItemElement&> items = {
+    //        Book(100, "5678"),
+    //        Fruit(10, 2, "Banana"),
+    //        Fruit(5, 5, "Apple")
+    //    };
+
+    //    int total = calculatePrice(items);
+    //    cout << "Total cost = " << total << endl;
+    //}
+
+    return 0;
+}
+#endif
+```
