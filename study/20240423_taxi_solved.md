@@ -1,3 +1,330 @@
+### [김민재] #1
+
+```cpp
+#include <stdio.h>
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define ABS(x) (((x) > 0) ? (x) : -(x))
+#define MAX_SIZE 100000
+
+/* These constant variables will NOT be changed */
+static constexpr int MAX_DRIVER_COUNT = 100;
+static constexpr int MAX_PASSENGER_COUNT = 10'000;
+
+bool isArrived[MAX_PASSENGER_COUNT];
+int numberOfDriver;
+int numberOfPassenger;
+long long maxDriverScore;
+
+struct Pair
+{
+    int key;
+    long long value;
+};
+
+struct PriorityQueue
+{
+    Pair heap[MAX_SIZE];
+    int heapSize = 0;
+
+    void heapInit()
+    {
+       heapSize = 0;
+    }
+
+    void heapPush(int key, long long value)
+    {
+       heap[heapSize].key = key;
+       heap[heapSize].value = value;
+       int current = heapSize;
+       while (current > 0 && heap[current].value < heap[(current - 1) / 2].value)
+       {
+          Pair temp = heap[(current - 1) / 2];
+          heap[(current - 1) / 2] = heap[current];
+          heap[current] = temp;
+          current = (current - 1) / 2;
+       }
+       heapSize = heapSize + 1;
+    }
+
+    Pair heapPop()
+    {
+       Pair value = heap[0];
+       heapSize = heapSize - 1;
+
+       heap[0] = heap[heapSize];
+
+       int current = 0;
+       while (current * 2 + 1 < heapSize)
+       {
+          int child;
+          if (current * 2 + 2 == heapSize)
+             child = current * 2 + 1;
+          else
+             child = heap[current * 2 + 1].value < heap[current * 2 + 2].value ? current * 2 + 1 : current * 2 + 2;
+
+          if (heap[current].value < heap[child].value)
+             break;
+
+          Pair temp = heap[current];
+          heap[current] = heap[child];
+          heap[child] = temp;
+          current = child;
+       }
+       return value;
+    }
+};
+
+struct Coordinate
+{
+    int y, x;
+};
+
+struct Passenger
+{
+    Coordinate departure;
+    Coordinate arrival;
+};
+
+struct Passengers
+{
+    int id[200];
+    int size = 0;
+
+    void clear()
+    {
+       size = 0;
+    }
+
+    void add(int passengerId)
+    {
+       id[size] = passengerId;
+       size += 1;
+    }
+};
+
+extern bool assign_driver(int driverID, int passengerSize, int passengerIDs[]);
+
+Passengers passengersClassifiedAsDeparture[100][100];
+Passenger passenger[MAX_PASSENGER_COUNT + MAX_DRIVER_COUNT];
+
+struct Driver
+{
+    Coordinate coordinate;
+    PriorityQueue nextPassengers;
+    int currentPassenger;
+    int passengerSize = 0;
+    int passengerIDs[MAX_PASSENGER_COUNT];
+    long long score;
+
+    void init(Coordinate coordinate)
+    {
+       score = 0;
+       this->coordinate = coordinate;
+       passengerSize = 0;
+       nextPassengers.heapInit();
+    }
+
+    long long getIncrement()
+    {
+       int passengerId = nextPassengers.heap[0].key;
+       Coordinate pickUp = passenger[passengerId].departure;
+       Coordinate dropOff = passenger[passengerId].arrival;
+       return ABS(pickUp.y - coordinate.y) + ABS(pickUp.x - coordinate.x) + ABS(dropOff.y - pickUp.y) + ABS(dropOff.x - pickUp.x);
+    }
+
+    void printAssignScore()
+    {
+       int passengerId = nextPassengers.heap[0].key;
+       Coordinate pickUp = passenger[passengerId].departure;
+       Coordinate dropOff = passenger[passengerId].arrival;
+       long long pickUpScore = ABS(pickUp.y - coordinate.y) + ABS(pickUp.x - coordinate.x);
+       long long dropScore = ABS(dropOff.y - pickUp.y) + ABS(dropOff.x - pickUp.x);
+       printf(" pickUp: %10lld  |  drop score: %10lld \n", pickUpScore, dropScore);
+    }
+
+    void assign()
+    {
+       //printAssignScore();
+       currentPassenger = nextPassengers.heap[0].key;
+       score += getIncrement();
+       passengerIDs[passengerSize++] = currentPassenger;
+       coordinate = passenger[currentPassenger].arrival;
+       nextPassengers.heapInit();
+       isArrived[currentPassenger] = true;
+       maxDriverScore = MAX(maxDriverScore, score);
+    }
+
+    void addToQueue(int range)
+    {
+       int py = coordinate.y / 10000;
+       int px = coordinate.x / 10000;
+       int sy = py - range < 0 ? 0 : py - range;
+       int ey = py + range > 100 ? 100 : py + range;
+       int sx = px - range < 0 ? 0 : px - range;
+       int ex = px + range > 100 ? 100 : px + range;
+
+       for (int i = sy; i < ey; ++i)
+       {
+          for (int j = sx; j < ex; ++j)
+          {
+             for (int k = 0; k < passengersClassifiedAsDeparture[i][j].size; ++k)
+             {
+                int nextPassenger = passengersClassifiedAsDeparture[i][j].id[k];
+
+                if (isArrived[nextPassenger])
+                   continue;
+
+                Coordinate departure = passenger[nextPassenger].departure;
+                long long distance = ABS(coordinate.y - departure.y) + ABS(coordinate.x - departure.x);
+                nextPassengers.heapPush(nextPassenger, distance);
+             }
+          }
+       }
+
+       if (nextPassengers.heapSize == 0)
+       {
+          addToQueue(range + 5);
+       }
+    }
+
+    void removeArrivedPassenger()
+    {
+       while (nextPassengers.heapSize >0 && isArrived[nextPassengers.heap[0].key])
+       {
+          nextPassengers.heapPop();
+       }
+    }
+
+    void setNextPassengers()
+    {
+       if (nextPassengers.heapSize == 0)
+          addToQueue(5);
+    }
+};
+
+Driver driver[MAX_DRIVER_COUNT + MAX_DRIVER_COUNT];
+
+void initGlobalVariable(int M, Coordinate* mDriver, int K, Passenger* mPassenger)
+{
+    maxDriverScore = 0;
+    numberOfDriver = M;
+    numberOfPassenger = K;
+
+    for (int i = 0; i < numberOfPassenger; ++i)
+    {
+       passenger[i].departure = mPassenger[i].departure;
+       passenger[i].arrival = mPassenger[i].arrival;
+       isArrived[i] = false;
+
+    }
+
+    for (int i = 0; i < numberOfDriver; ++i)
+    {
+       int passengerId = numberOfPassenger + i;
+       driver[i].init(mDriver[i]);
+       driver[i].currentPassenger = passengerId;
+       passenger[passengerId].departure.y = -1;
+       passenger[passengerId].departure.x = -1;
+       passenger[passengerId].arrival = mDriver[i];
+       isArrived[passengerId] = true;
+    }
+}
+
+void clearClassifiedPassengers()
+{
+    for (int i = 0; i<100; i++)
+    {
+       for (int j = 0; j<100; j++)
+       {
+          passengersClassifiedAsDeparture[i][j].clear();
+       }
+    }
+}
+
+void classifyPassengers()
+{
+    for (int i = 0; i < numberOfPassenger; ++i)
+    {
+       Coordinate departure = passenger[i].departure;
+       passengersClassifiedAsDeparture[departure.y / 10000][departure.x / 10000].add(i);
+    }
+}
+
+
+void printDriverScore()
+{
+    for (int i = 0; i < numberOfDriver; ++i)
+    {
+       printf(" %2d Driver score: %3d \n", i, driver[i].score);
+    }
+    printf(" Max Driver score: %3d \n", maxDriverScore);
+    printf(" --------------------------------------- \n");
+    
+}
+
+void assign()
+{
+    while (numberOfPassenger > 0)
+    {
+       numberOfPassenger -= 1;
+       for (int j = 0; j < numberOfDriver; ++j)
+       {
+          driver[j].removeArrivedPassenger();
+          driver[j].setNextPassengers();
+          int k = 0;
+       }
+
+       int driverId = 0;
+       long long minPickUpDist = driver[0].nextPassengers.heap[0].value;
+       long long minPickUpDist1 = driver[0].nextPassengers.heap[1].value;
+       long long minPickUpDist2 = driver[0].nextPassengers.heap[2].value;
+       
+       //long long minIncrementOfMaxDriverScore = MAX(0, driver[0].score + driver[0].getIncrement() - maxDriverScore);
+       long long minIncrementOfMaxDriverScore = driver[0].score + driver[0].getIncrement() - maxDriverScore;
+
+       for (int j = 1; j < numberOfDriver; ++j)
+       {
+          long long pickUpDist = driver[j].nextPassengers.heap[0].value;
+          //long long incrementOfMaxDriverScore = MAX(0, driver[j].score + driver[j].getIncrement() - maxDriverScore);
+          long long incrementOfMaxDriverScore = driver[j].score + driver[j].getIncrement() - maxDriverScore;
+
+          if (incrementOfMaxDriverScore >= minIncrementOfMaxDriverScore)
+             continue;
+          if(incrementOfMaxDriverScore == 0 && pickUpDist >= minPickUpDist)
+             continue;
+
+          driverId = j;
+          minPickUpDist = pickUpDist;
+          minIncrementOfMaxDriverScore = incrementOfMaxDriverScore;
+       }
+
+       driver[driverId].assign();
+       //printDriverScore();
+       int k = 0;
+    }
+}
+
+void assignDriver()
+{
+    for (int i = 0; i < numberOfDriver; ++i)
+    {
+       assign_driver(i, driver[i].passengerSize, driver[i].passengerIDs);
+    }
+}
+
+
+void run(int N, int M, Coordinate mDriver[], int K, Passenger mPassenger[])
+{
+    initGlobalVariable(M, mDriver, K, mPassenger);
+    clearClassifiedPassengers();
+    classifyPassengers();
+    assign();
+    assignDriver();
+    //printDriverScore();
+    int k = 0;
+}
+```
+
 ### [박종환]
 
 - 택시 운행 시마다 score 를 저장하여 매번 택시 운행을 위해 가장 score 상승이 낮은 택시-손님 페어를 찾아서 운행하였습니다.
@@ -1158,5 +1485,194 @@ void run(int N, int M, Coordinate mDriver[], int K, Passenger mPassenger[])
 
 	}
 	return;
+}
+```
+
+### [main]
+
+```cpp
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
+
+#include <stdio.h>
+#include <time.h>
+
+static unsigned long long seed = 5;
+
+static int pseudo_rand(void)
+{
+    seed = seed * 25214903917ULL + 11ULL;
+    return (seed >> 16) & 0x3fffffff;
+}
+
+
+static constexpr int MAX_TC = 5;
+
+/* These constant variables will NOT be changed */
+static constexpr int MAP_SIZE = 1'000'000;
+static constexpr int MAX_DRIVER_COUNT = 100;
+static constexpr int MAX_PASSENGER_COUNT = 10'000;
+static constexpr long long PENALTY = 10'000'000'000'000LL;
+
+struct Coordinate
+{
+    int y, x;
+};
+
+
+struct Passenger
+{
+    Coordinate departure;
+    Coordinate arrival;
+};
+
+
+extern void run(int, int, Coordinate [], int, Passenger []);
+
+#define ABS(x) (((x) > 0) ? (x) : -(x))
+
+
+static int driverCnt;
+static Coordinate driverList[MAX_DRIVER_COUNT];
+static Coordinate driverList_bak[MAX_DRIVER_COUNT];
+static int passengerCnt;
+static Passenger passengerList[MAX_PASSENGER_COUNT];
+static Passenger passengerList_bak[MAX_PASSENGER_COUNT];
+static int isFinished[MAX_PASSENGER_COUNT];
+static int assignList[MAX_DRIVER_COUNT][MAX_PASSENGER_COUNT];
+static int assignListSize[MAX_DRIVER_COUNT];
+
+static long long SCORE = 0;
+
+
+bool assign_driver(int driverID, int passengerSize, int passengerIDs[])
+{
+    if (driverID < 0 || driverID >= driverCnt)
+        return false;
+
+    if (passengerSize < 0 || passengerSize > MAX_PASSENGER_COUNT)
+        return false;
+
+    for (int i = 0; i < passengerSize; i++)
+    {
+        if (passengerIDs[i] < 0 || passengerIDs[i] >= passengerCnt)
+            return false;
+    }
+
+    for (int i = 0; i < passengerSize; i++)
+    {
+        assignList[driverID][i] = passengerIDs[i];
+    }
+
+    assignListSize[driverID] = passengerSize;
+
+    return true;
+}
+
+
+static void make_tc()
+{
+    driverCnt = pseudo_rand() % 50 + 51;
+    passengerCnt = pseudo_rand() % 5000 + 5001;
+
+    for (int i = 0; i < driverCnt; i++)
+    {
+        driverList[i].y = driverList_bak[i].y = pseudo_rand() % MAP_SIZE;
+        driverList[i].x = driverList_bak[i].x = pseudo_rand() % MAP_SIZE;
+        assignListSize[i] = 0;
+    }
+
+    for (int i = 0; i < passengerCnt; i++)
+    {
+        passengerList[i].departure.y = passengerList_bak[i].departure.y = pseudo_rand() % MAP_SIZE;
+        passengerList[i].departure.x = passengerList_bak[i].departure.x = pseudo_rand() % MAP_SIZE;
+        passengerList[i].arrival.y = passengerList_bak[i].arrival.y = pseudo_rand() % MAP_SIZE;
+        passengerList[i].arrival.x = passengerList_bak[i].arrival.x = pseudo_rand() % MAP_SIZE;
+        isFinished[i] = 0;
+    }
+}
+
+static bool verify()
+{
+    long long maxTestCaseScore = 0;
+    long long totalPassengerScore = 0;
+    long long totalPickUpScore = 0;
+
+    for (int i = 0; i < driverCnt; i++)
+    {
+        Coordinate driverPos = driverList[i];
+        long long score = 0;
+
+        long long passengerScore = 0;
+        long long pickUpScore = 0;
+
+        for (int j = 0; j < assignListSize[i]; j++)
+        {
+            int passengerID = assignList[i][j];
+            Coordinate pickUp = passengerList[passengerID].departure;
+            Coordinate dropOff = passengerList[passengerID].arrival;
+
+            if (isFinished[passengerID] == 1)
+                return false;
+
+            score += ABS(pickUp.y - driverPos.y) + ABS(pickUp.x - driverPos.x) + ABS(dropOff.y - pickUp.y) + ABS(dropOff.x - pickUp.x);
+
+            pickUpScore += ABS(pickUp.y - driverPos.y) + ABS(pickUp.x - driverPos.x);
+            passengerScore += ABS(dropOff.y - pickUp.y) + ABS(dropOff.x - pickUp.x);
+            //score += ABS(dropOff.y - pickUp.y) + ABS(dropOff.x - pickUp.x);
+            driverPos = dropOff;
+            isFinished[passengerID] = 1;
+        }
+
+        if (maxTestCaseScore < score)
+            maxTestCaseScore = score;
+
+        totalPickUpScore += pickUpScore;
+        totalPassengerScore += passengerScore;
+    }
+
+    for (int i = 0; i < passengerCnt; i++)
+    {
+        if (isFinished[i] == 0)
+        {
+            return false;
+        }
+    }
+
+    //printf("Total Passenger SCORE: %12lld\n", totalPassengerScore);
+    //printf("         Driver Count: %12d\n", driverCnt);
+
+    //printf("   Total PickUp SCORE: %12lld\n", totalPickUpScore);
+    printf("  Min Passenger SCORE: %12lld\n", (totalPassengerScore) / driverCnt);
+    printf("     Min Driver SCORE: %12lld\n", (totalPassengerScore + totalPickUpScore) / driverCnt);
+    printf("     Max Driver SCORE: %12lld\n", maxTestCaseScore);
+    printf("-------------------------------------\n");
+    SCORE += maxTestCaseScore;
+    return true;
+}
+
+int main()
+{
+    clock_t start = clock();
+    setbuf(stdout, nullptr);
+
+    for (int tc = 0; tc < MAX_TC; tc++)
+    {
+        printf("TestCase: %d\n", tc);
+        make_tc();
+        run(MAP_SIZE, driverCnt, driverList_bak, passengerCnt, passengerList_bak);
+
+        if (verify() == false)
+        {
+            printf("SCORE: %lld\n", PENALTY);
+            //return 0;
+        }
+    }
+
+    printf("SCORE: %lld\n", SCORE);
+    printf("RESULT : %dms\n", (clock() - start) / (CLOCKS_PER_SEC / 1000));
+    return 0;
 }
 ```
